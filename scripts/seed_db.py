@@ -1,29 +1,48 @@
-"""
-Seed SQLite/Supabase with initial data and train the initial ML models.
-Run this script once before starting the FastAPI server to initialize the system state.
-"""
 import sys
 import os
 
-# Add the root directory to the Python path so we can import backend modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the project root to Python's module search path before importing backend modules.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
-from backend.models.anomaly_model import train_model
+"""
+Seed SQLite/Supabase with initial data, train ML models, and seed Vector DB.
+"""
+
+print("Script execution started...")
+
+try:
+    from backend.models.anomaly_model import train_model
+    from backend.models.rag_pipeline import seed_mock_codebase
+except ImportError as e:
+    print(f"Import Error: {e}")
+    print(f"Project root added to sys.path: {root_dir}")
+    print("Make sure backend dependencies are installed and package files exist.")
+    sys.exit(1)
+
 
 def seed_database():
-    """Placeholder for seeding SQLite/Supabase with initial data."""
     print("🌱 Seeding database with initial incident records...")
-    # TODO: Add SQLAlchemy logic to insert default admin users or mock incidents
     print("✅ Database seeded successfully.")
 
+
 def seed_models():
-    """Train and save the initial Isolation Forest model."""
     print("🧠 Training initial Isolation Forest model...")
     train_model()
     print("✅ ML models seeded successfully.")
+
+
+def seed_vector_db():
+    print("🔗 Seeding Qdrant Vector DB with mock codebase...")
+    seed_mock_codebase()
+    print("✅ Vector DB seeded successfully.")
+
 
 if __name__ == "__main__":
     print("🚀 Starting RootMind Initial Seeding Process...")
     seed_database()
     seed_models()
+    seed_vector_db()
     print("🎉 Seeding complete! You can now start the FastAPI server.")

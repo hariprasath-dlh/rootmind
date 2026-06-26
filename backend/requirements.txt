@@ -24,6 +24,7 @@ pandas==2.2.2
 
 # Vector DB Client
 qdrant-client==1.9.1
+sentence-transformers==3.0.1
 
 # HTTP and External APIs
 requests==2.32.3

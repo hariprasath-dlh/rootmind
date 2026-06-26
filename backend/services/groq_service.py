@@ -1,35 +1,23 @@
 """
-groq_service.py - Groq API Inference Service Wrapper
-
-Exposes simplified interfaces to run LLM completions (Llama 3/Mixtral) on Groq Cloud,
-managing client instantiation, retry logic, and fallback settings.
+Groq API wrapper for LLM inference.
+Uses LangChain's ChatGroq for structured interactions with Llama 3.
 """
+from langchain_groq import ChatGroq
+from backend.app.config import get_settings
 
-from typing import Dict, Any, List
+settings = get_settings()
 
+def get_llm():
+    """Initializes and returns the ChatGroq LLM instance."""
+    return ChatGroq(
+        groq_api_key=settings.GROQ_API_KEY,
+        # Using Llama 3.3 (70B) - it's free, incredibly fast on Groq, and smart.
+        model_name="llama-3.3-70b-versatile", 
+        temperature=0.1 # Low temperature for factual, deterministic RCA
+    )
 
-class GroqService:
-    """
-    Client wrapper for submitting completion queries to Groq API.
-    """
-    def __init__(self) -> None:
-        self.api_key = "gsk_..."
-
-    def generate_chat_completion(
-        self, 
-        messages: List[Dict[str, str]], 
-        temperature: float = 0.1, 
-        max_tokens: int = 1000
-    ) -> str:
-        """
-        Sends structured message prompts to Groq LLM endpoint.
-        
-        Args:
-            messages (List[Dict[str, str]]): List of message role/content objects.
-            temperature (float): Controls response randomness.
-            max_tokens (int): Max content tokens in response.
-
-        Returns:
-            str: Completed text.
-        """
-        return "Stubbed completion result from Groq model."
+def query_llm(prompt: str) -> str:
+    """Sends a prompt to the LLM and returns the text response."""
+    llm = get_llm()
+    response = llm.invoke(prompt)
+    return response.content

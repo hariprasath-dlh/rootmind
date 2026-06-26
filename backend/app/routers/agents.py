@@ -1,10 +1,13 @@
 """
 Agent trigger and status endpoints.
 """
+import traceback # <-- Add this import at the top of the file
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from backend.agents.anomaly_agent import analyze_logs
+from backend.agents.rca_agent import analyze_root_cause
 
 router = APIRouter()
 
@@ -18,20 +21,35 @@ class LogPayload(BaseModel):
     raw_log: Optional[str] = None
 
 @router.post("/analyze")
-async def trigger_anomaly_detection(payload: LogPayload):
+async def trigger_autonomous_pipeline(payload: LogPayload):
     """
-    Receives a log payload and triggers the Anomaly Detection Agent.
+    Receives a log payload. 
+    1. Runs Anomaly Detection.
+    2. If anomaly detected, automatically triggers Root Cause Analysis (RCA).
     """
     try:
-        # Convert Pydantic model to dict for the agent
         log_data = payload.model_dump()
         
-        # Run the agent
-        result = analyze_logs(log_data)
+        # Step 1: Anomaly Detection
+        anomaly_result = analyze_logs(log_data)
         
-        return {
+        final_response = {
             "status": "success",
-            "data": result
+            "anomaly_assessment": anomaly_result,
+            "rca_report": None
         }
+        
+        # Step 2: If anomaly detected, trigger RCA automatically!
+        if anomaly_result["assessment"]["is_anomaly"]:
+            print("🚨 Anomaly detected! Triggering RCA Agent automatically...")
+            rca_result = analyze_root_cause(anomaly_result)
+            final_response["rca_report"] = rca_result
+            
+        return final_response
+        
     except Exception as e:
+        # 🔥 THIS WILL PRINT THE EXACT ERROR TO YOUR TERMINAL
+        print("\n🔥 FULL TRACEBACK:")
+        traceback.print_exc()
+        print("🔥 END TRACEBACK\n")
         raise HTTPException(status_code=500, detail=str(e))
