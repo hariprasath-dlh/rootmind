@@ -1,27 +1,39 @@
 """
-anomaly_agent.py - Anomaly Agent Scoring Node
-
-Loads the trained Isolation Forest model and exposes a function to
-evaluate whether incoming metric/log arrays are anomalous.
+Anomaly Detection Agent.
+Processes incoming log data and uses the Isolation Forest to detect anomalies.
 """
+from backend.models.anomaly_model import predict_anomaly
 
-from typing import Dict, Any
-
-
-def score_log_metrics(log_payload: Dict[str, Any]) -> Dict[str, Any]:
+def analyze_logs(log_data: dict) -> dict:
     """
-    Evaluates system metrics log data for structural anomalies.
-    Loads models/anomaly_model.py and generates scoring classifications.
+    Main entry point for the Anomaly Agent.
+    Extracts features from the log payload and returns the anomaly assessment.
+    """
+    print(f"🔍 Anomaly Agent analyzing logs for service: {log_data.get('service', 'unknown')}")
     
-    Args:
-        log_payload (Dict[str, Any]): Dict container metrics (CPU, latency, etc.).
-
-    Returns:
-        Dict[str, Any]: Results details containing is_anomaly flag, anomaly_score,
-                       and metrics evaluated.
-    """
-    return {
-        "is_anomaly": False,
-        "anomaly_score": 0.12,
-        "metrics_evaluated": list(log_payload.keys())
+    # Extract the 4 key metrics from the incoming log data
+    features = [
+        float(log_data.get("cpu_usage", 0.0)),
+        float(log_data.get("memory_usage", 0.0)),
+        float(log_data.get("request_latency_ms", 0.0)),
+        float(log_data.get("error_rate", 0.0))
+    ]
+    
+    # Call the ML model
+    result = predict_anomaly(features)
+    
+    # Format the agent's output
+    agent_output = {
+        "agent": "anomaly_detector",
+        "status": "completed",
+        "service": log_data.get("service", "unknown"),
+        "timestamp": log_data.get("timestamp", "unknown"),
+        "assessment": result
     }
+    
+    if result["is_anomaly"]:
+        print(f"🚨 ANOMALY DETECTED! Score: {result['anomaly_score']:.4f}")
+    else:
+        print(f"✅ System normal. Score: {result['anomaly_score']:.4f}")
+        
+    return agent_output

@@ -4,7 +4,7 @@ Uses SQLAlchemy with async SQLite support.
 """
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.config import get_settings
+from backend.app.config import get_settings
 
 settings = get_settings()
 

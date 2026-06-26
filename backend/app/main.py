@@ -4,7 +4,8 @@ Handles CORS, router registration, and startup events.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import get_settings
+from backend.app.config import get_settings
+from backend.app.routers import agents # <-- IMPORT THE ROUTER
 
 settings = get_settings()
 
@@ -28,7 +29,5 @@ async def health_check():
     """Health check endpoint for Render/UptimeRobot."""
     return {"status": "healthy", "service": "RootMind Backend"}
 
-# TODO: Include routers here in Phase 1 Step 5
-# from app.routers import incidents, agents
-# app.include_router(incidents.router, prefix="/api/v1/incidents", tags=["Incidents"])
-# app.include_router(agents.router, prefix="/api/v1/agents", tags=["Agents"])
+# Register the Agents router
+app.include_router(agents.router, prefix="/api/v1/agents", tags=["Agents"])
