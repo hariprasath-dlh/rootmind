@@ -1,122 +1,197 @@
 """
-graph.py - Main LangGraph state machine, node definitions, and workflows
-
-Defines the multi-agent execution pipeline structure, managing the state
-flow between Anomaly, RCA, Fix, and Post-Mortem agents.
+LangGraph State Machine for RootMind Autonomous Pipeline.
+Orchestrates all agents in a stateful workflow with conditional routing.
 """
-
-from typing import TypedDict, Optional, Dict, Any
+from typing import TypedDict, Optional, Any
 from langgraph.graph import StateGraph, END
 
+from backend.agents.anomaly_agent import analyze_logs
+from backend.agents.rca_agent import analyze_root_cause
 
+
+# ============================================================
+# 1. DEFINE THE STATE SCHEMA
+# ============================================================
 class AgentState(TypedDict):
-    """
-    Main LangGraph state tracking schema for RootMind multi-agent workflow.
-    """
-    raw_logs: Dict[str, Any]
-    anomaly_report: Optional[Dict[str, Any]]
-    rca_report: Optional[Dict[str, Any]]
-    fix_suggestion: Optional[Dict[str, Any]]
-    postmortem_report: Optional[Dict[str, Any]]
-    status: str
+    """The state that flows through the LangGraph pipeline."""
+    raw_logs: dict                    # Input: raw log data
+    anomaly_report: Optional[dict]    # Output from Anomaly Agent
+    rca_report: Optional[dict]        # Output from RCA Agent
+    fix_suggestion: Optional[dict]    # Output from Fix Agent (stub)
+    postmortem_report: Optional[dict] # Output from Post-Mortem Agent (stub)
+    status: str                       # Current workflow status
+    error: Optional[str]              # Error message if something fails
 
 
-def anomaly_detection_node(state: AgentState) -> AgentState:
-    """
-    State machine node to determine if a log pattern contains anomalous behavior.
-    Calls anomaly_agent module.
-    
-    Args:
-        state (AgentState): Current graph execution state.
-
-    Returns:
-        AgentState: Updated graph state.
-    """
-    return state
-
-
-def rca_node(state: AgentState) -> AgentState:
-    """
-    State machine node to analyze root cause from log and repository artifacts.
-    Calls rca_agent module.
-
-    Args:
-        state (AgentState): Current graph execution state.
-
-    Returns:
-        AgentState: Updated graph state.
-    """
-    return state
+# ============================================================
+# 2. DEFINE THE NODES (Each node is an agent)
+# ============================================================
+def anomaly_detection_node(state: AgentState) -> dict:
+    """Node 1: Run the Anomaly Detection Agent."""
+    print("\n" + "="*60)
+    print("🔍 [NODE 1] Anomaly Detection Agent - Starting")
+    print("="*60)
+    try:
+        result = analyze_logs(state["raw_logs"])
+        return {
+            "anomaly_report": result,
+            "status": "anomaly_detection_complete"
+        }
+    except Exception as e:
+        print(f"❌ Anomaly Agent failed: {e}")
+        return {
+            "anomaly_report": {"error": str(e)},
+            "status": "failed",
+            "error": f"Anomaly Agent error: {str(e)}"
+        }
 
 
-def fix_suggestion_node(state: AgentState) -> AgentState:
-    """
-    State machine node to draft target code patch and implementation diff.
-    Calls fix_agent module.
-
-    Args:
-        state (AgentState): Current graph execution state.
-
-    Returns:
-        AgentState: Updated graph state.
-    """
-    return state
-
-
-def postmortem_node(state: AgentState) -> AgentState:
-    """
-    State machine node to generate incident post-mortem documentation report.
-    Calls postmortem_agent.
-
-    Args:
-        state (AgentState): Current graph execution state.
-
-    Returns:
-        AgentState: Updated graph state.
-    """
-    return state
+def rca_node(state: AgentState) -> dict:
+    """Node 2: Run the Root Cause Analysis Agent."""
+    print("\n" + "="*60)
+    print("🔎 [NODE 2] Root Cause Analysis Agent - Starting")
+    print("="*60)
+    try:
+        result = analyze_root_cause(state["anomaly_report"])
+        return {
+            "rca_report": result,
+            "status": "rca_complete"
+        }
+    except Exception as e:
+        print(f"❌ RCA Agent failed: {e}")
+        return {
+            "rca_report": {"error": str(e)},
+            "status": "failed",
+            "error": f"RCA Agent error: {str(e)}"
+        }
 
 
-def should_continue(state: AgentState) -> str:
-    """
-    Conditional routing function logic. Checks if anomaly score is above the threshold.
-    
-    Args:
-        state (AgentState): Current state containing anomaly report.
-
-    Returns:
-        str: Next node to route to ("rca_node" or END).
-    """
-    anomaly = state.get("anomaly_report")
-    if anomaly and anomaly.get("is_anomaly", False):
-        return "rca_node"
-    return END
-
-
-# Define state machine graph
-workflow = StateGraph(AgentState)
-
-# Add node processes
-workflow.add_node("anomaly_detection", anomaly_detection_node)
-workflow.add_node("rca", rca_node)
-workflow.add_node("fix_suggestion", fix_suggestion_node)
-workflow.add_node("postmortem", postmortem_node)
-
-# Set starting point entry
-workflow.set_entry_point("anomaly_detection")
-
-# Configure conditional and static edges
-workflow.add_conditional_edges(
-    "anomaly_detection",
-    should_continue,
-    {
-        "rca_node": "rca",
-        END: END
+def fix_suggester_node(state: AgentState) -> dict:
+    """Node 3: Fix Suggester Agent (STUB - will be built in Phase 4)."""
+    print("\n" + "="*60)
+    print("🛠️  [NODE 3] Fix Suggester Agent - Starting (STUB)")
+    print("="*60)
+    print("⚠️  Fix Suggester will be implemented in Phase 4")
+    return {
+        "fix_suggestion": {
+            "agent": "fix_suggester",
+            "status": "pending_implementation",
+            "message": "Fix suggestion will be generated in Phase 4"
+        },
+        "status": "fix_suggestion_complete"
     }
-)
-workflow.add_edge("rca", "fix_suggestion")
-workflow.add_edge("fix_suggestion", "postmortem")
-workflow.add_edge("postmortem", END)
 
-# Compile graph
-app_graph = workflow.compile()
+
+def postmortem_writer_node(state: AgentState) -> dict:
+    """Node 4: Post-Mortem Writer Agent (STUB - will be built in Phase 5)."""
+    print("\n" + "="*60)
+    print("📄 [NODE 4] Post-Mortem Writer Agent - Starting (STUB)")
+    print("="*60)
+    print("⚠️  Post-Mortem Writer will be implemented in Phase 5")
+    return {
+        "postmortem_report": {
+            "agent": "postmortem_writer",
+            "status": "pending_implementation",
+            "message": "Post-mortem will be generated in Phase 5"
+        },
+        "status": "postmortem_complete"
+    }
+
+
+# ============================================================
+# 3. DEFINE CONDITIONAL ROUTING
+# ============================================================
+def should_continue_to_rca(state: AgentState) -> str:
+    """
+    Conditional edge: Decide whether to trigger RCA or end the pipeline.
+    Only proceed to RCA if an anomaly was actually detected.
+    """
+    anomaly_report = state.get("anomaly_report", {})
+    
+    # Check if there was an error in anomaly detection
+    if "error" in anomaly_report:
+        print("⚠️  Anomaly detection had an error. Ending pipeline.")
+        return "end"
+    
+    # Check if anomaly was detected
+    assessment = anomaly_report.get("assessment", {})
+    is_anomaly = assessment.get("is_anomaly", False)
+    
+    if is_anomaly:
+        print("🚨 Anomaly confirmed! Routing to RCA Agent...")
+        return "continue_to_rca"
+    else:
+        print("✅ System is normal. No further analysis needed.")
+        return "end"
+
+
+# ============================================================
+# 4. BUILD THE GRAPH
+# ============================================================
+def build_pipeline():
+    """Constructs and compiles the LangGraph state machine."""
+    
+    # Initialize the state graph
+    workflow = StateGraph(AgentState)
+    
+    # Add nodes (names must NOT match state keys!)
+    workflow.add_node("anomaly_detector", anomaly_detection_node)
+    workflow.add_node("rca_analyzer", rca_node)
+    workflow.add_node("fix_suggester", fix_suggester_node)
+    workflow.add_node("postmortem_writer", postmortem_writer_node)
+    
+    # Set entry point
+    workflow.set_entry_point("anomaly_detector")
+    
+    # Add conditional edge after anomaly detection
+    workflow.add_conditional_edges(
+        "anomaly_detector",
+        should_continue_to_rca,
+        {
+            "continue_to_rca": "rca_analyzer",
+            "end": END
+        }
+    )
+    
+    # Linear flow for the rest
+    workflow.add_edge("rca_analyzer", "fix_suggester")
+    workflow.add_edge("fix_suggester", "postmortem_writer")
+    workflow.add_edge("postmortem_writer", END)
+    
+    # Compile the graph
+    return workflow.compile()
+
+
+# ============================================================
+# 5. EXPOSE THE PIPELINE FUNCTION
+# ============================================================
+pipeline = build_pipeline()
+
+def run_pipeline(log_data: dict) -> dict:
+    """
+    Main entry point for the autonomous pipeline.
+    Takes raw log data and returns the complete state after all agents run.
+    """
+    print("\n" + "🚀"*30)
+    print("🚀 ROOTMIND AUTONOMOUS PIPELINE - STARTING")
+    print("🚀"*30)
+    
+    # Initialize the state
+    initial_state: AgentState = {
+        "raw_logs": log_data,
+        "anomaly_report": None,
+        "rca_report": None,
+        "fix_suggestion": None,
+        "postmortem_report": None,
+        "status": "starting",
+        "error": None
+    }
+    
+    # Run the pipeline
+    final_state = pipeline.invoke(initial_state)
+    
+    print("\n" + "✅"*30)
+    print(f"✅ PIPELINE COMPLETE - Final Status: {final_state['status']}")
+    print("✅"*30 + "\n")
+    
+    return final_state

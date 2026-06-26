@@ -1,17 +1,17 @@
 """
 Agent trigger and status endpoints.
+Uses LangGraph to orchestrate the autonomous pipeline.
 """
-import traceback # <-- Add this import at the top of the file
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from backend.agents.anomaly_agent import analyze_logs
-from backend.agents.rca_agent import analyze_root_cause
+from backend.agents.graph import run_pipeline
 
 router = APIRouter()
 
+
 class LogPayload(BaseModel):
+    """Schema for incoming log data."""
     service: str
     timestamp: str
     cpu_usage: float
@@ -20,36 +20,47 @@ class LogPayload(BaseModel):
     error_rate: float
     raw_log: Optional[str] = None
 
-@router.post("/analyze")
-async def trigger_autonomous_pipeline(payload: LogPayload):
+
+@router.post("/run")
+async def run_autonomous_pipeline(payload: LogPayload):
     """
-    Receives a log payload. 
-    1. Runs Anomaly Detection.
-    2. If anomaly detected, automatically triggers Root Cause Analysis (RCA).
+    Triggers the full LangGraph autonomous pipeline.
+    
+    Flow:
+    1. Anomaly Detection (always runs)
+    2. Root Cause Analysis (only if anomaly detected)
+    3. Fix Suggestion (stub - Phase 4)
+    4. Post-Mortem Writer (stub - Phase 5)
     """
     try:
         log_data = payload.model_dump()
         
-        # Step 1: Anomaly Detection
-        anomaly_result = analyze_logs(log_data)
+        # Run the LangGraph pipeline
+        final_state = run_pipeline(log_data)
         
-        final_response = {
+        return {
             "status": "success",
-            "anomaly_assessment": anomaly_result,
-            "rca_report": None
+            "pipeline_status": final_state["status"],
+            "anomaly_assessment": final_state.get("anomaly_report"),
+            "rca_report": final_state.get("rca_report"),
+            "fix_suggestion": final_state.get("fix_suggestion"),
+            "postmortem_report": final_state.get("postmortem_report"),
+            "error": final_state.get("error")
         }
         
-        # Step 2: If anomaly detected, trigger RCA automatically!
-        if anomaly_result["assessment"]["is_anomaly"]:
-            print("🚨 Anomaly detected! Triggering RCA Agent automatically...")
-            rca_result = analyze_root_cause(anomaly_result)
-            final_response["rca_report"] = rca_result
-            
-        return final_response
-        
     except Exception as e:
-        # 🔥 THIS WILL PRINT THE EXACT ERROR TO YOUR TERMINAL
+        import traceback
         print("\n🔥 FULL TRACEBACK:")
         traceback.print_exc()
         print("🔥 END TRACEBACK\n")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/status/{run_id}")
+async def get_pipeline_status(run_id: str):
+    """Get the status of a pipeline run (placeholder for future implementation)."""
+    return {
+        "run_id": run_id,
+        "status": "not_implemented",
+        "message": "Pipeline status tracking will be added in a future phase"
+    }
