@@ -89,19 +89,40 @@ def fix_suggester_node(state: AgentState) -> dict:
 
 
 def postmortem_writer_node(state: AgentState) -> dict:
-    """Node 4: Post-Mortem Writer Agent (STUB - will be built in Phase 5)."""
+    """Node 4: Post-Mortem Writer Agent - Generates incident reports."""
+    from backend.agents.postmortem_agent import generate_postmortem
+    from backend.models.memory_engine import store_incident
+    
     print("\n" + "="*60)
-    print("📄 [NODE 4] Post-Mortem Writer Agent - Starting (STUB)")
+    print("📄 [NODE 4] Post-Mortem Writer Agent - Starting")
     print("="*60)
-    print("⚠️  Post-Mortem Writer will be implemented in Phase 5")
-    return {
-        "postmortem_report": {
-            "agent": "postmortem_writer",
-            "status": "pending_implementation",
-            "message": "Post-mortem will be generated in Phase 5"
-        },
-        "status": "postmortem_complete"
-    }
+    try:
+        # Prepare incident data
+        incident_data = {
+            "service": state["raw_logs"].get("service", "unknown"),
+            "timestamp": state["raw_logs"].get("timestamp", ""),
+            "anomaly_report": state["anomaly_report"],
+            "rca_report": state["rca_report"],
+            "fix_suggestion": state["fix_suggestion"]
+        }
+        
+        # Generate post-mortem
+        result = generate_postmortem(incident_data)
+        
+        # Store incident in memory for future pattern recognition
+        store_incident(incident_data, result["incident_id"])
+        
+        return {
+            "postmortem_report": result,
+            "status": "postmortem_complete"
+        }
+    except Exception as e:
+        print(f"❌ Post-Mortem Writer failed: {e}")
+        return {
+            "postmortem_report": {"error": str(e)},
+            "status": "failed",
+            "error": f"Post-Mortem Writer error: {str(e)}"
+        }
 
 
 # ============================================================

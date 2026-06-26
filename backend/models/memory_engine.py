@@ -1,51 +1,110 @@
 """
-memory_engine.py - Incident Long-Term Memory & Pattern Engine
-
-Manages archiving resolved incidents into semantic memory vectors, enabling the RCA agent
-to match current anomalies against past resolutions.
+Memory Engine for long-term incident pattern recognition.
+Stores resolved incidents in Qdrant for future reference.
 """
+from typing import Optional
+from qdrant_client.models import PointStruct
+from backend.models.rag_pipeline import get_qdrant_client, embed_text, initialize_collection
+from backend.app.config import get_settings
 
-from typing import List, Dict, Any
+settings = get_settings()
+MEMORY_COLLECTION_NAME = "rootmind_incident_memory"
 
 
-class IncidentMemoryEngine:
+def initialize_memory_collection():
+    """Creates the incident memory collection if it doesn't exist."""
+    client = get_qdrant_client()
+    collections = client.get_collections().collections
+    collection_exists = any(c.name == MEMORY_COLLECTION_NAME for c in collections)
+    
+    if not collection_exists:
+        print(f"📦 Creating memory collection '{MEMORY_COLLECTION_NAME}'...")
+        from qdrant_client.models import Distance, VectorParams
+        client.create_collection(
+            collection_name=MEMORY_COLLECTION_NAME,
+            vectors_config=VectorParams(size=384, distance=Distance.COSINE)
+        )
+        print("✅ Memory collection created.")
+
+
+def store_incident(incident_data: dict, incident_id: str):
     """
-    Manages loading, saving, and querying incident memory collections in Qdrant.
+    Stores a resolved incident in the memory collection for future pattern recognition.
     """
-    def __init__(self) -> None:
-        self.collection_name = "incident_memory"
+    print(f"🧠 Memory Engine: Storing incident {incident_id}...")
+    
+    initialize_memory_collection()
+    client = get_qdrant_client()
+    
+    # Create a searchable text representation of the incident
+    searchable_text = f"""
+    Service: {incident_data.get('service', 'unknown')}
+    Root Cause: {incident_data.get('rca_report', {}).get('root_cause', {}).get('root_cause_summary', '')}
+    Technical Explanation: {incident_data.get('rca_report', {}).get('root_cause', {}).get('technical_explanation', '')}
+    Responsible File: {incident_data.get('rca_report', {}).get('root_cause', {}).get('responsible_file', '')}
+    Fix: {incident_data.get('fix_suggestion', {}).get('fix', {}).get('explanation', '')}
+    """
+    
+    # Generate embedding
+    vector = embed_text(searchable_text)
+    
+    # Store in Qdrant
+    payload = {
+        "incident_id": incident_id,
+        "service": incident_data.get("service", "unknown"),
+        "timestamp": incident_data.get("timestamp", ""),
+        "root_cause": incident_data.get("rca_report", {}).get("root_cause", {}).get("root_cause_summary", ""),
+        "responsible_file": incident_data.get("rca_report", {}).get("root_cause", {}).get("responsible_file", ""),
+        "fix_summary": incident_data.get("fix_suggestion", {}).get("fix", {}).get("explanation", ""),
+        "searchable_text": searchable_text
+    }
+    
+    # Use incident_id as the point ID (convert string to int hash)
+    point_id = hash(incident_id) % 1000000
+    
+    client.upsert(
+        collection_name=MEMORY_COLLECTION_NAME,
+        points=[
+            PointStruct(id=point_id, vector=vector, payload=payload)
+        ]
+    )
+    
+    print(f"✅ Incident {incident_id} stored in memory.")
 
-    def record_incident_resolution(
-        self, 
-        incident_id: int, 
-        anomaly_details: Dict[str, Any], 
-        rca_details: Dict[str, Any], 
-        fix_details: Dict[str, Any]
-    ) -> None:
-        """
-        Embeds the completed diagnosis context and archives to memory vector store.
-        
-        Args:
-            incident_id (int): DB key of the resolved incident.
-            anomaly_details (Dict[str, Any]): Evaluation metrics details.
-            rca_details (Dict[str, Any]): Root Cause Analysis diagnostics.
-            fix_details (Dict[str, Any]): Executed code changes information.
-        """
-        pass
 
-    def find_similar_incidents(
-        self, 
-        current_anomaly: Dict[str, Any], 
-        limit: int = 3
-    ) -> List[Dict[str, Any]]:
-        """
-        Queries similarity index for historical incident matches to provide contextual hints.
-        
-        Args:
-            current_anomaly (Dict[str, Any]): Target anomaly characteristics.
-            limit (int): Max reference incidents to pull.
-
-        Returns:
-            List[Dict[str, Any]]: Matching historical incidents and details.
-        """
-        return []
+def find_similar_incidents(current_incident: dict, limit: int = 3) -> list[dict]:
+    """
+    Searches for similar past incidents to provide context for RCA.
+    """
+    print("🔍 Memory Engine: Searching for similar past incidents...")
+    
+    initialize_memory_collection()
+    client = get_qdrant_client()
+    
+    # Create query text from current incident
+    query_text = f"""
+    Service: {current_incident.get('service', 'unknown')}
+    Symptoms: High CPU, High Memory, Extreme Latency, High Error Rate
+    """
+    
+    query_vector = embed_text(query_text)
+    
+    # Search for similar incidents
+    search_result = client.search(
+        collection_name=MEMORY_COLLECTION_NAME,
+        query_vector=query_vector,
+        limit=limit
+    )
+    
+    similar_incidents = []
+    for hit in search_result:
+        similar_incidents.append({
+            "incident_id": hit.payload.get("incident_id", "unknown"),
+            "service": hit.payload.get("service", "unknown"),
+            "root_cause": hit.payload.get("root_cause", ""),
+            "responsible_file": hit.payload.get("responsible_file", ""),
+            "similarity_score": hit.score
+        })
+    
+    print(f"✅ Found {len(similar_incidents)} similar past incidents.")
+    return similar_incidents
