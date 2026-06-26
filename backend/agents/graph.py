@@ -67,19 +67,25 @@ def rca_node(state: AgentState) -> dict:
 
 
 def fix_suggester_node(state: AgentState) -> dict:
-    """Node 3: Fix Suggester Agent (STUB - will be built in Phase 4)."""
+    """Node 3: Fix Suggester Agent - Generates code patches."""
+    from backend.agents.fix_agent import generate_fix
+    
     print("\n" + "="*60)
-    print("🛠️  [NODE 3] Fix Suggester Agent - Starting (STUB)")
+    print("🛠️  [NODE 3] Fix Suggester Agent - Starting")
     print("="*60)
-    print("⚠️  Fix Suggester will be implemented in Phase 4")
-    return {
-        "fix_suggestion": {
-            "agent": "fix_suggester",
-            "status": "pending_implementation",
-            "message": "Fix suggestion will be generated in Phase 4"
-        },
-        "status": "fix_suggestion_complete"
-    }
+    try:
+        result = generate_fix(state["rca_report"])
+        return {
+            "fix_suggestion": result,
+            "status": "fix_suggestion_complete"
+        }
+    except Exception as e:
+        print(f"❌ Fix Suggester failed: {e}")
+        return {
+            "fix_suggestion": {"error": str(e)},
+            "status": "failed",
+            "error": f"Fix Suggester error: {str(e)}"
+        }
 
 
 def postmortem_writer_node(state: AgentState) -> dict:
@@ -128,17 +134,47 @@ def should_continue_to_rca(state: AgentState) -> str:
 # ============================================================
 # 4. BUILD THE GRAPH
 # ============================================================
+def send_slack_alert_node(state: AgentState) -> dict:
+    """Node 5: Send Slack alert with full incident details."""
+    from backend.services.slack_service import send_alert
+    
+    print("\n" + "="*60)
+    print("💬 [NODE 5] Slack Alert - Starting")
+    print("="*60)
+    try:
+        # Prepare data for Slack
+        incident_data = {
+            "service": state["raw_logs"].get("service", "unknown"),
+            "anomaly_report": state["anomaly_report"],
+            "rca_report": state["rca_report"],
+            "fix_suggestion": state["fix_suggestion"],
+            "postmortem_report": state["postmortem_report"]
+        }
+        
+        result = send_alert(incident_data)
+        return {
+            "status": "slack_alert_sent"
+        }
+    except Exception as e:
+        print(f"❌ Slack alert failed: {e}")
+        return {
+            "status": "slack_alert_failed",
+            "error": f"Slack alert error: {str(e)}"
+        }
+
+
 def build_pipeline():
     """Constructs and compiles the LangGraph state machine."""
     
     # Initialize the state graph
     workflow = StateGraph(AgentState)
     
-    # Add nodes (names must NOT match state keys!)
+    # Add nodes
     workflow.add_node("anomaly_detector", anomaly_detection_node)
     workflow.add_node("rca_analyzer", rca_node)
     workflow.add_node("fix_suggester", fix_suggester_node)
     workflow.add_node("postmortem_writer", postmortem_writer_node)
+    workflow.add_node("slack_alerter", send_slack_alert_node)
     
     # Set entry point
     workflow.set_entry_point("anomaly_detector")
@@ -156,7 +192,8 @@ def build_pipeline():
     # Linear flow for the rest
     workflow.add_edge("rca_analyzer", "fix_suggester")
     workflow.add_edge("fix_suggester", "postmortem_writer")
-    workflow.add_edge("postmortem_writer", END)
+    workflow.add_edge("postmortem_writer", "slack_alerter")
+    workflow.add_edge("slack_alerter", END)
     
     # Compile the graph
     return workflow.compile()
