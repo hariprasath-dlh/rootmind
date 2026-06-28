@@ -9,9 +9,6 @@
 [![Qdrant](https://img.shields.io/badge/Qdrant-Cloud_Vector_DB-red.svg)](https://qdrant.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![Dashboard Overview](docs/screenshots/dashboard.png)
-
-
 
 ## 📋 Table of Contents
 1. [Project Overview](#-project-overview)
