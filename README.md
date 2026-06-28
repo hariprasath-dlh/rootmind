@@ -11,12 +11,7 @@
 
 ![Dashboard Overview](docs/screenshots/dashboard.png)
 
-### 🔗 Quick Links
-- **[Live Demo](https://linkforge-three.vercel.app/)**
-- **[Platform Documentation](docs/DOCUMENTATION.md)**
-- **[Report an Issue](https://github.com/hariprasath-dlh/rootmind/issues)**
 
----
 
 ## 📋 Table of Contents
 1. [Project Overview](#-project-overview)
@@ -580,28 +575,6 @@ RootMind coordinates five specialized agents using LangGraph's state machine:
 
 ---
 
-## 🖼️ Screenshots
-
-### Cinematic Command Center
-![Cinematic Command Center](docs/screenshots/dashboard.png)
-*Real-time active incident tracking, global system health status indicators, and live multi-agent pipeline monitoring.*
-
-### Root Cause Analysis & Git Diff View
-![RCA Git Diff](docs/screenshots/rca_diff.png)
-*Vector search trace details showing the responsible file, suspected commit, and the generated bug fix patch.*
-
----
-
-## 📹 Demo Video
-
-Watch a **[2-Minute Walkthrough Video](https://www.youtube.com/watch?v=dQw4w9WgXcQ)** to see RootMind in action:
-- **0:15**: Isolation Forest detects a service response anomaly.
-- **0:45**: RCA agent queries Qdrant vector database to identify the buggy source file.
-- **1:15**: Fix agent drafts a git diff patch.
-- **1:45**: Incident alert is delivered to Slack, and the post-mortem is published to the dashboard.
-
----
-
 ## ⚡ Performance Benchmarks
 
 - **Pipeline Execution Time**: ~30 seconds (telemetry ingestion to alert dispatch).
@@ -700,12 +673,6 @@ Contributions make the open-source community an amazing place to learn, inspire,
 
 ---
 
-## 📄 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
----
-
 ## 💖 Acknowledgments
 
 - **LangGraph**: For the flexible state graph framework.
@@ -717,9 +684,9 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## ✉️ Contact & Support
 
-- **Author**: Hariprasath
-- **Email**: hariprasath.dev@example.com
-- **LinkedIn**: [hariprasath-dlh](https://linkedin.com/in/hariprasath-dlh)
+- **Author**: Hariprasath L V
+- **Email**: hariprasathdlh@gmail.com
+- **LinkedIn**: [hariprasathlv](https://www.linkedin.com/in/hariprasath-lv/)
 - **GitHub**: [@hariprasath-dlh](https://github.com/hariprasath-dlh)
 
 ---
