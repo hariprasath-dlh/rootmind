@@ -21,6 +21,8 @@ scikit-learn==1.5.0
 joblib==1.4.2
 numpy==1.26.4
 pandas==2.2.2
+tf-keras>=2.15.0
+
 
 # Vector DB Client
 qdrant-client==1.9.1
@@ -35,5 +37,5 @@ slack_sdk==3.27.2
 pytest==8.2.2
 pytest-asyncio==0.23.7
 pytest-cov==5.0.0
-aiosqlite>=0.20.0
-
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
