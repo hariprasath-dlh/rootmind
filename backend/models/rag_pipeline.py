@@ -22,7 +22,7 @@ def get_embedding_model():
     """Loads the local SentenceTransformer model."""
     global _embedding_model
     if _embedding_model is None:
-        print("🧠 Loading SentenceTransformer model (first time only)...")
+        print("? Loading SentenceTransformer model (first time only)...")
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     return _embedding_model
 
@@ -30,7 +30,7 @@ def get_qdrant_client():
     """Initializes the connection to Qdrant Cloud."""
     global _qdrant_client
     if _qdrant_client is None:
-        print("🔗 Connecting to Qdrant Cloud...")
+        print("? Connecting to Qdrant Cloud...")
         _qdrant_client = QdrantClient(
             url=settings.QDRANT_URL,
             api_key=settings.QDRANT_API_KEY,
@@ -48,14 +48,14 @@ def initialize_collection():
     collection_exists = any(c.name == COLLECTION_NAME for c in collections)
     
     if not collection_exists:
-        print(f"📦 Creating Qdrant collection '{COLLECTION_NAME}'...")
+        print(f"? Creating Qdrant collection '{COLLECTION_NAME}'...")
         client.create_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE)
         )
-        print("✅ Collection created.")
+        print("? Collection created.")
     else:
-        print(f"✅ Collection '{COLLECTION_NAME}' already exists.")
+        print(f"? Collection '{COLLECTION_NAME}' already exists.")
 
 def embed_text(text: str) -> list[float]:
     """Converts raw text into a high-dimensional vector embedding."""
@@ -84,10 +84,10 @@ def semantic_search(query: str, limit: int = 3) -> list[dict]:
     """Searches the Qdrant collection for code chunks relevant to the query."""
     client = get_qdrant_client()
     
-    # 🛡️ DEFENSIVE PROGRAMMING: Ensure collection exists before searching
+    # ?? DEFENSIVE PROGRAMMING: Ensure collection exists before searching
     collections = client.get_collections().collections
     if not any(c.name == COLLECTION_NAME for c in collections):
-        print("⚠️ Collection not found during search. Initializing empty collection...")
+        print("?? Collection not found during search. Initializing empty collection...")
         initialize_collection()
         return [] # Return empty results if we just created it
         
@@ -112,7 +112,7 @@ def semantic_search(query: str, limit: int = 3) -> list[dict]:
 
 def seed_mock_codebase():
     """Seeds Qdrant with mock codebase chunks for testing the RAG pipeline."""
-    print("🌱 Seeding mock codebase into Qdrant...")
+    print("? Seeding mock codebase into Qdrant...")
     initialize_collection()
     
     # These mock chunks contain intentional bugs that match our anomaly symptoms
@@ -146,4 +146,4 @@ def seed_mock_codebase():
     for chunk in mock_chunks:
         upsert_code_chunk(chunk["id"], chunk["file"], chunk["content"], chunk["commit"])
         
-    print(f"✅ Seeded {len(mock_chunks)} mock code chunks into Qdrant.")
+    print(f"? Seeded {len(mock_chunks)} mock code chunks into Qdrant.")

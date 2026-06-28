@@ -5,7 +5,7 @@ Handles CORS, router registration, and startup events.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.config import get_settings
-from backend.app.routers import agents # <-- IMPORT THE ROUTER
+from backend.app.routers import agents, incidents # <-- IMPORT ROUTERS
 
 settings = get_settings()
 
@@ -15,10 +15,20 @@ app = FastAPI(
     version="0.1.0"
 )
 
+@app.on_event("startup")
+async def startup_event():
+    from backend.app.database import init_db
+    init_db()  # Sync call ? creates tables using the sync engine
+
 # Configure CORS for Frontend (Lovable AI / Vercel)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to your Vercel URL
+    allow_origins=[
+        "http://localhost:5173",   # Vite dev server
+        "http://localhost:3000",   # Alternate local dev
+        "http://localhost:8080",   # Lovable/TanStack Start default port
+        "*",                       # In production, remove this and add your Vercel URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,5 +39,6 @@ async def health_check():
     """Health check endpoint for Render/UptimeRobot."""
     return {"status": "healthy", "service": "RootMind Backend"}
 
-# Register the Agents router
+# Register the routers
 app.include_router(agents.router, prefix="/api/v1/agents", tags=["Agents"])
+app.include_router(incidents.router, prefix="/api/v1/incidents", tags=["Incidents"])

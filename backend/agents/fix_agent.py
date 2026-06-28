@@ -12,7 +12,7 @@ def generate_fix(rca_report: dict) -> dict:
     Main entry point for the Fix Suggester Agent.
     Takes the RCA report and generates a specific code patch.
     """
-    print("🛠️  Fix Suggester: Starting fix generation...")
+    print("[FIX]  Fix Suggester: Starting fix generation...")
     
     # Extract root cause details
     root_cause = rca_report.get("root_cause", {})
@@ -63,7 +63,7 @@ def generate_fix(rca_report: dict) -> dict:
     Do not include any text outside the JSON block. Do not include markdown formatting like ```json.
     """
     
-    print("🧠 Fix Suggester: Querying Groq LLM for code patch...")
+    print("[AI] Fix Suggester: Querying Groq LLM for code patch...")
     llm_response = query_llm(prompt)
     
     # Parse the JSON response
@@ -77,11 +77,11 @@ def generate_fix(rca_report: dict) -> dict:
             "fix": parsed_response,
             "target_file": responsible_file
         }
-        print(f"✅ Fix Suggester: Generated patch for {responsible_file}")
+        print(f"[OK] Fix Suggester: Generated patch for {responsible_file}")
         return fix_result
         
     except json.JSONDecodeError:
-        print("⚠️ Fix Suggester: Failed to parse LLM JSON response. Returning raw text.")
+        print("[WARN] Fix Suggester: Failed to parse LLM JSON response. Returning raw text.")
         return {
             "agent": "fix_suggester",
             "status": "completed",

@@ -18,20 +18,20 @@ def initialize_memory_collection():
     collection_exists = any(c.name == MEMORY_COLLECTION_NAME for c in collections)
     
     if not collection_exists:
-        print(f"📦 Creating memory collection '{MEMORY_COLLECTION_NAME}'...")
+        print(f"? Creating memory collection '{MEMORY_COLLECTION_NAME}'...")
         from qdrant_client.models import Distance, VectorParams
         client.create_collection(
             collection_name=MEMORY_COLLECTION_NAME,
             vectors_config=VectorParams(size=384, distance=Distance.COSINE)
         )
-        print("✅ Memory collection created.")
+        print("? Memory collection created.")
 
 
 def store_incident(incident_data: dict, incident_id: str):
     """
     Stores a resolved incident in the memory collection for future pattern recognition.
     """
-    print(f"🧠 Memory Engine: Storing incident {incident_id}...")
+    print(f"? Memory Engine: Storing incident {incident_id}...")
     
     initialize_memory_collection()
     client = get_qdrant_client()
@@ -69,14 +69,14 @@ def store_incident(incident_data: dict, incident_id: str):
         ]
     )
     
-    print(f"✅ Incident {incident_id} stored in memory.")
+    print(f"? Incident {incident_id} stored in memory.")
 
 
 def find_similar_incidents(current_incident: dict, limit: int = 3) -> list[dict]:
     """
     Searches for similar past incidents to provide context for RCA.
     """
-    print("🔍 Memory Engine: Searching for similar past incidents...")
+    print("? Memory Engine: Searching for similar past incidents...")
     
     initialize_memory_collection()
     client = get_qdrant_client()
@@ -106,5 +106,5 @@ def find_similar_incidents(current_incident: dict, limit: int = 3) -> list[dict]
             "similarity_score": hit.score
         })
     
-    print(f"✅ Found {len(similar_incidents)} similar past incidents.")
+    print(f"? Found {len(similar_incidents)} similar past incidents.")
     return similar_incidents

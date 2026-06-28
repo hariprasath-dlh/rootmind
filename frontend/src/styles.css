@@ -1,0 +1,310 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * RootMind — "Biopunk Command Glass" design system.
+ * Dark is primary; light mirrors structure with translucent bone surfaces.
+ * Existing token names are preserved (--bg-void, --accent-primary, etc.)
+ * so all current components inherit the new aesthetic.
+ */
+
+@theme inline {
+  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Instrument Serif", Georgia, serif;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --color-bg-void: var(--bg-void);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-hover: var(--bg-surface-hover);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-glass: var(--glass-primary);
+  --color-glass-strong: var(--glass-secondary);
+  --color-glass-border: var(--glass-border);
+  --color-glass-border-active: var(--glass-border-active);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-dim: var(--accent-primary-dim);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-severity-critical: var(--severity-critical);
+  --color-severity-high: var(--severity-high);
+  --color-severity-medium: var(--severity-medium);
+  --color-severity-low: var(--severity-low);
+  --color-status-ok: var(--status-ok);
+
+  /* Shadcn aliases */
+  --color-background: var(--bg-void);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--bg-surface);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--accent-primary);
+  --color-primary-foreground: #04110a;
+  --color-secondary: var(--bg-surface-hover);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--bg-surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--bg-surface-hover);
+  --color-accent-foreground: var(--text-primary);
+  --color-destructive: var(--severity-critical);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--border-subtle);
+  --color-input: var(--border-subtle);
+  --color-ring: var(--accent-primary);
+  --color-ring-offset-background: var(--bg-void);
+  --color-chart-1: var(--accent-primary);
+  --color-chart-2: var(--accent-secondary);
+  --color-chart-3: var(--severity-high);
+  --color-chart-4: var(--severity-medium);
+  --color-chart-5: var(--text-muted);
+  --color-sidebar: var(--bg-surface);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar-primary: var(--accent-primary);
+  --color-sidebar-primary-foreground: #04110a;
+  --color-sidebar-accent: var(--bg-surface-hover);
+  --color-sidebar-accent-foreground: var(--text-primary);
+  --color-sidebar-border: var(--border-subtle);
+  --color-sidebar-ring: var(--accent-primary);
+}
+
+/* DARK = default. Light layered on .light class. */
+:root {
+  /* Biopunk dark — near-black with blue tint, glass surfaces, electric green */
+  --bg-void: #080c10;
+  --bg-surface: rgba(255, 255, 255, 0.04);
+  --bg-surface-hover: rgba(255, 255, 255, 0.07);
+  --bg-elevated: rgba(17, 24, 32, 0.92);
+
+  --glass-primary: rgba(255, 255, 255, 0.04);
+  --glass-secondary: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-active: rgba(61, 255, 160, 0.28);
+  --glass-shine: rgba(255, 255, 255, 0.18);
+
+  --accent-primary: #3dffa0;
+  --accent-primary-dim: rgba(61, 255, 160, 0.16);
+  --accent-secondary: #60a5fa;
+  --accent-bio-glow: rgba(61, 255, 160, 0.18);
+
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --text-faint: rgba(255, 255, 255, 0.30);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --severity-critical: #ff4d6d;
+  --severity-high: #ff8c42;
+  --severity-medium: #ffd166;
+  --severity-low: #3dffa0;
+  --status-ok: #3dffa0;
+}
+
+.light {
+  --bg-void: #eef2f5;
+  --bg-surface: rgba(255, 255, 255, 0.6);
+  --bg-surface-hover: rgba(255, 255, 255, 0.85);
+  --bg-elevated: rgba(255, 255, 255, 0.95);
+
+  --glass-primary: rgba(255, 255, 255, 0.55);
+  --glass-secondary: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(10, 20, 15, 0.08);
+  --glass-border-active: rgba(15, 158, 90, 0.35);
+  --glass-shine: rgba(255, 255, 255, 0.85);
+
+  --accent-primary: #0f9e5a;
+  --accent-primary-dim: rgba(15, 158, 90, 0.16);
+  --accent-secondary: #0284c7;
+  --accent-bio-glow: rgba(15, 158, 90, 0.18);
+
+  --text-primary: rgba(10, 20, 15, 0.92);
+  --text-muted: rgba(10, 20, 15, 0.58);
+  --text-faint: rgba(10, 20, 15, 0.34);
+
+  --border-subtle: rgba(10, 20, 15, 0.08);
+  --border-strong: rgba(10, 20, 15, 0.18);
+
+  --severity-critical: #d62839;
+  --severity-high: #c96a1a;
+  --severity-medium: #b8860b;
+  --severity-low: #0f9e5a;
+  --status-ok: #0f9e5a;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    background-color: var(--bg-void);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    transition:
+      background-color 400ms ease,
+      color 400ms ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-subtle);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+    background-clip: padding-box;
+  }
+
+  ::selection {
+    background: var(--accent-primary);
+    color: #04110a;
+  }
+
+  .font-mono,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Core glass panel — every card / sidebar / topbar uses this language */
+@utility glass {
+  background: var(--glass-primary);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  position: relative;
+}
+
+@utility glass-strong {
+  background: var(--glass-secondary);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+
+@utility glass-shine {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--glass-shine),
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+@utility grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+.light .grid-bg {
+  background-image:
+    linear-gradient(rgba(10, 20, 15, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 20, 15, 0.04) 1px, transparent 1px);
+}
+
+@utility scan-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-primary) 50%,
+    transparent 100%
+  );
+}
+
+@utility glow-primary {
+  box-shadow:
+    0 0 0 1px var(--accent-primary),
+    0 0 32px -4px var(--accent-bio-glow);
+}
+
+@utility ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.88); }
+}
+@keyframes flow-particle {
+  0% { transform: translateX(-100%); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.1); }
+}
+@keyframes bio-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px var(--accent-bio-glow),
+      inset 0 0 0 1px var(--glass-border);
+  }
+  50% {
+    box-shadow:
+      0 0 28px var(--accent-bio-glow),
+      inset 0 0 0 1px var(--glass-border-active);
+  }
+}
+
+.animate-pulse-dot { animation: pulse-dot 2.2s ease-in-out infinite; }
+.animate-flow { animation: flow-particle 1.6s linear infinite; }
+.animate-scan { animation: scan 2.4s ease-in-out infinite; }
+.animate-drift { animation: drift 20s ease-in-out infinite alternate; }
+.animate-drift-slow { animation: drift 30s ease-in-out infinite alternate-reverse; }
+.animate-bio-pulse { animation: bio-pulse 2.8s ease-in-out infinite; }

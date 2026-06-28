@@ -8,8 +8,6 @@ from typing import Optional
 from backend.agents.graph import run_pipeline
 
 router = APIRouter()
-
-
 class LogPayload(BaseModel):
     """Schema for incoming log data."""
     service: str
@@ -19,6 +17,7 @@ class LogPayload(BaseModel):
     request_latency_ms: float
     error_rate: float
     raw_log: Optional[str] = None
+    repo_url: Optional[str] = None
 
 
 @router.post("/run")
@@ -34,10 +33,7 @@ async def run_autonomous_pipeline(payload: LogPayload):
     """
     try:
         log_data = payload.model_dump()
-        
-        # Run the LangGraph pipeline
-        final_state = run_pipeline(log_data)
-        
+        final_state = await run_pipeline(log_data)
         return {
             "status": "success",
             "pipeline_status": final_state["status"],
@@ -50,9 +46,9 @@ async def run_autonomous_pipeline(payload: LogPayload):
         
     except Exception as e:
         import traceback
-        print("\n🔥 FULL TRACEBACK:")
+        print("\n? FULL TRACEBACK:")
         traceback.print_exc()
-        print("🔥 END TRACEBACK\n")
+        print("? END TRACEBACK\n")
         raise HTTPException(status_code=500, detail=str(e))
 
 

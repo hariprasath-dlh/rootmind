@@ -12,7 +12,7 @@ def generate_postmortem(incident_data: dict) -> dict:
     Main entry point for the Post-Mortem Writer Agent.
     Generates a professional incident report.
     """
-    print("📄 Post-Mortem Writer: Starting report generation...")
+    print("[DOC] Post-Mortem Writer: Starting report generation...")
     
     # Extract data from the incident
     service = incident_data.get("service", "unknown")
@@ -84,7 +84,7 @@ def generate_postmortem(incident_data: dict) -> dict:
     Do not include any text outside the Markdown report.
     """
     
-    print("🧠 Post-Mortem Writer: Querying Groq LLM for report...")
+    print("[AI] Post-Mortem Writer: Querying Groq LLM for report...")
     llm_response = query_llm(prompt)
     
     # Generate a unique incident ID
@@ -98,5 +98,5 @@ def generate_postmortem(incident_data: dict) -> dict:
         "generated_at": datetime.now().isoformat()
     }
     
-    print(f"✅ Post-Mortem Writer: Generated report {incident_id}")
+    print(f"[OK] Post-Mortem Writer: Generated report {incident_id}")
     return postmortem_result

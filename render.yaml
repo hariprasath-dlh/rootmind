@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: rootmind-backend
+    runtime: docker
+    repo: https://github.com/yourusername/rootmind
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./rootmind.db
+      - key: GITHUB_TOKEN
+        sync: false

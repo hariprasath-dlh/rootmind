@@ -15,7 +15,7 @@ def train_model():
     Generates synthetic 'normal' server metrics and trains the Isolation Forest.
     In a real scenario, this would be trained on historical production data.
     """
-    print("🧠 Training Isolation Forest on synthetic normal data...")
+    print("? Training Isolation Forest on synthetic normal data...")
     
     # Generate 1000 rows of "normal" server metrics
     # Features: [cpu_usage(%), memory_usage(%), request_latency(ms), error_rate(%)]
@@ -33,13 +33,13 @@ def train_model():
     
     # Save the model to disk
     joblib.dump(model, MODEL_PATH)
-    print(f"✅ Model trained and saved to {MODEL_PATH}")
+    print(f"? Model trained and saved to {MODEL_PATH}")
     return model
 
 def load_model():
     """Loads the trained model from disk. Trains a new one if it doesn't exist."""
     if not os.path.exists(MODEL_PATH):
-        print("⚠️ Model not found. Training a new one...")
+        print("?? Model not found. Training a new one...")
         return train_model()
     return joblib.load(MODEL_PATH)
 

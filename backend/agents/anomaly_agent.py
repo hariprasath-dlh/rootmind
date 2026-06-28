@@ -9,7 +9,7 @@ def analyze_logs(log_data: dict) -> dict:
     Main entry point for the Anomaly Agent.
     Extracts features from the log payload and returns the anomaly assessment.
     """
-    print(f"🔍 Anomaly Agent analyzing logs for service: {log_data.get('service', 'unknown')}")
+    print(f"[SEARCH] Anomaly Agent analyzing logs for service: {log_data.get('service', 'unknown')}")
     
     # Extract the 4 key metrics from the incoming log data
     features = [
@@ -32,8 +32,8 @@ def analyze_logs(log_data: dict) -> dict:
     }
     
     if result["is_anomaly"]:
-        print(f"🚨 ANOMALY DETECTED! Score: {result['anomaly_score']:.4f}")
+        print(f"[ALERT] ANOMALY DETECTED! Score: {result['anomaly_score']:.4f}")
     else:
-        print(f"✅ System normal. Score: {result['anomaly_score']:.4f}")
+        print(f"[OK] System normal. Score: {result['anomaly_score']:.4f}")
         
     return agent_output
