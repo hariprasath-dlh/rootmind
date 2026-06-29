@@ -11,14 +11,13 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install
-COPY requirements.txt .
+# Copy requirements from backend folder and install
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application code into the backend package directory
-COPY . /app/backend/
-WORKDIR /app
+# Copy application code from backend folder into /app/backend/
+COPY backend/ /app/backend/
 
 # Expose port (Render uses PORT env variable, default 10000)
 EXPOSE 10000
