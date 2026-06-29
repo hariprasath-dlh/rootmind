@@ -24,10 +24,10 @@ async def startup_event():
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",   # Vite dev server
-        "http://localhost:3000",   # Alternate local dev
-        "http://localhost:8080",   # Lovable/TanStack Start default port
-        "*",                       # In production, remove this and add your Vercel URL
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "https://vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
