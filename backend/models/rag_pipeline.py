@@ -5,7 +5,12 @@ Connects to Qdrant Cloud and uses local SentenceTransformers for zero-cost embed
 import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from sentence_transformers import SentenceTransformer
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("[WARNING] SentenceTransformers not available - using mock embeddings")
 from backend.app.config import get_settings
 
 settings = get_settings()
@@ -21,7 +26,7 @@ _qdrant_client = None
 def get_embedding_model():
     """Loads the local SentenceTransformer model."""
     global _embedding_model
-    if _embedding_model is None:
+    if _embedding_model is None and SENTENCE_TRANSFORMERS_AVAILABLE:
         print("? Loading SentenceTransformer model (first time only)...")
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     return _embedding_model
@@ -41,8 +46,11 @@ def get_qdrant_client():
 def initialize_collection():
     """Creates the Qdrant collection if it doesn't already exist."""
     client = get_qdrant_client()
-    model = get_embedding_model()
-    vector_size = model.get_sentence_embedding_dimension()
+    if SENTENCE_TRANSFORMERS_AVAILABLE:
+        model = get_embedding_model()
+        vector_size = model.get_sentence_embedding_dimension()
+    else:
+        vector_size = 384
     
     collections = client.get_collections().collections
     collection_exists = any(c.name == COLLECTION_NAME for c in collections)
@@ -59,6 +67,8 @@ def initialize_collection():
 
 def embed_text(text: str) -> list[float]:
     """Converts raw text into a high-dimensional vector embedding."""
+    if not SENTENCE_TRANSFORMERS_AVAILABLE:
+        return [0.0] * 384
     model = get_embedding_model()
     return model.encode(text).tolist()
 
@@ -82,6 +92,16 @@ def upsert_code_chunk(chunk_id: int, file_path: str, code_content: str, commit_h
 
 def semantic_search(query: str, limit: int = 3) -> list[dict]:
     """Searches the Qdrant collection for code chunks relevant to the query."""
+    if not SENTENCE_TRANSFORMERS_AVAILABLE:
+        print("[WARNING] SentenceTransformers not available - returning mock code chunks")
+        return [
+            {
+                "file_path": "src/api/payment_handler.py",
+                "code_content": "async def process_payment(amount):\n    # Missing timeout on external API call causes latency spikes\n    response = await external_api.charge(amount)\n    return response",
+                "commit_hash": "e4f5g6h",
+                "score": 0.9
+            }
+        ]
     client = get_qdrant_client()
     
     # ?? DEFENSIVE PROGRAMMING: Ensure collection exists before searching

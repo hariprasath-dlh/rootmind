@@ -5,21 +5,23 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV TRANSFORMERS_OFFLINE=1
+ENV HF_HUB_OFFLINE=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements from backend folder and install
-COPY backend/requirements.txt .
+# Copy lightweight requirements for Render
+COPY backend/requirements-render.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements-render.txt
 
-# Copy application code from backend folder into /app/backend/
+# Copy application code
 COPY backend/ /app/backend/
 
-# Expose port (Render uses PORT env variable, default 10000)
+# Expose port
 EXPOSE 10000
 
 # Run the application

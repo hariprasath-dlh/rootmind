@@ -2,10 +2,17 @@
 Isolation Forest model for anomaly detection.
 Trains on synthetic normal server metrics and provides inference.
 """
-import joblib
 import numpy as np
 import os
-from sklearn.ensemble import IsolationForest
+
+try:
+    from sklearn.ensemble import IsolationForest
+    import joblib
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    joblib = None
+    print("[WARNING] Scikit-learn not available - using mock anomaly detection")
 
 # Path to save the trained model inside the models/ directory
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "anomaly_model.joblib")
@@ -48,6 +55,27 @@ def predict_anomaly(features: list[float]) -> dict:
     Predicts if the given server metrics are anomalous.
     Returns a dictionary with the prediction result and anomaly score.
     """
+    if not SKLEARN_AVAILABLE:
+        # Simple threshold-based detection as fallback
+        cpu = features[0]
+        memory = features[1]
+        latency = features[2]
+        error_rate = features[3]
+        
+        is_anomaly = cpu > 80 or memory > 85 or latency > 1000 or error_rate > 5
+        anomaly_score = -0.15 if is_anomaly else 0.15
+        
+        return {
+            "is_anomaly": is_anomaly,
+            "anomaly_score": anomaly_score,
+            "features": {
+                "cpu_usage": cpu,
+                "memory_usage": memory,
+                "request_latency_ms": latency,
+                "error_rate": error_rate
+            }
+        }
+        
     model = load_model()
     
     # Reshape for sklearn (expects 2D array)
