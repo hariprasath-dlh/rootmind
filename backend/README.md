@@ -53,9 +53,8 @@ curl -X POST https://YOUR-SPACE.hf.space/api/v1/agents/run \
 ```
 
 ## 🔗 Links
-Live Frontend: [Vercel URL]
-GitHub: [GitHub URL]
-Documentation: See README.md in repository
+- **GitHub:** https://github.com/hariprasath-dlh/rootmind
+- **Documentation:** See README.md in repository
 
 ## 📝 License
 MIT License

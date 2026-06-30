@@ -28,13 +28,12 @@
 15. [Security Considerations](#-security-considerations)
 16. [Troubleshooting](#-troubleshooting)
 17. [Testing](#-testing)
-18. [Deployment](#-deployment)
-19. [Future Roadmap](#-future-roadmap)
-20. [Contributing](#-contributing)
-21. [License](#-license)
-22. [Acknowledgments](#-acknowledgments)
-23. [Contact & Support](#-contact--support)
-24. [FAQ](#-faq)
+18. [Future Roadmap](#-future-roadmap)
+19. [Contributing](#-contributing)
+20. [License](#-license)
+21. [Acknowledgments](#-acknowledgments)
+22. [Contact & Support](#-contact--support)
+23. [FAQ](#-faq)
 
 ---
 
@@ -626,23 +625,6 @@ To run end-to-end integration tests:
 ```bash
 python scripts/test_e2e.py
 ```
-
----
-
-## 📦 Deployment
-
-### Backend Deployment (Render)
-1. Link your GitHub repository to your Render account.
-2. Select **Web Service** and choose the **Docker** runtime.
-3. Configure the environment variables on the Render dashboard as defined in `.env`.
-4. Deploy the service.
-
-### Frontend Deployment (Vercel)
-1. Add a new project in Vercel and link your repository.
-2. Set the root directory to `frontend`.
-3. Set the build command to `npm run build` and output directory to `.output/public`.
-4. Add the backend environment variable `VITE_API_BASE` pointing to your Render deployment URL.
-5. Deploy the service.
 
 ---
 
