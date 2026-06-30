@@ -69,26 +69,26 @@ RootMind automates the entire lifecycle. It acts as an autonomous virtual site r
 ### System Flow
 ```mermaid
 graph TD
-    A[Telemetry / Metrics Source] -->|Ingestion Webhook| B(FastAPI Backend)
-    B -->|Trigger Pipeline| C{LangGraph Orchestrator}
-    C --> D[Anomaly Detector Agent]
-    C --> E[RCA Agent]
-    C --> F[Fix Suggester Agent]
-    C --> G[Post-Mortem Writer Agent]
-    C --> H[Slack Alerter Agent]
-    D -->|Isolation Forest Model| I[(SQLite DB)]
-    E -->|RAG Query| J[(Qdrant Cloud Vector DB)]
-    E -->|LLM Context| K(Groq API / Llama 3)
-    F -->|GitHub REST API| L[Target Repo Codebase]
-    H -->|Slack Webhook| M[Slack Workspace]
-    B -->|Serve API| N[React Cinematic Dashboard]
+    A["Telemetry / Metrics Source"] -->|Ingestion Webhook| B("FastAPI Backend")
+    B -->|Trigger Pipeline| C{"LangGraph Orchestrator"}
+    C --> D["Anomaly Detector Agent"]
+    C --> E["RCA Agent"]
+    C --> F["Fix Suggester Agent"]
+    C --> G["Post-Mortem Writer Agent"]
+    C --> H["Slack Alerter Agent"]
+    D -->|Isolation Forest Model| I[("SQLite DB")]
+    E -->|RAG Query| J[("Qdrant Cloud Vector DB")]
+    E -->|LLM Context| K("Groq API / Llama 3")
+    F -->|GitHub REST API| L["Target Repo Codebase"]
+    H -->|Slack Webhook| M["Slack Workspace"]
+    B -->|Serve API| N["React Cinematic Dashboard"]
 ```
 
 ### Agent Workflow
 ```mermaid
 stateDiagram-v2
     [*] --> AnomalyDetection
-    AnomalyDetection --> RcaAnalysis : Anomaly Detected (Score < -0.3)
+    AnomalyDetection --> RcaAnalysis : "Anomaly Detected (Score < -0.3)"
     AnomalyDetection --> [*] : Nominal
     RcaAnalysis --> FixSuggestion : RCA Complete
     FixSuggestion --> PostMortemGeneration : Fix Drafted
